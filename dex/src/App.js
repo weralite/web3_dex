@@ -9,7 +9,7 @@ function App() {
 
     <div className="App">
       <Header />
-      <div className="mainWindows">
+      <div className="mainWindow">
         <Routes>
           <Route path="/" element={<Swap />} />
           <Route path="/tokens" element={<Tokens />} />
