@@ -6,6 +6,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import tokenList from '../tokenList.json';
+import axios from "axios";
 
 ///Hej
 
@@ -17,6 +18,7 @@ function Swap() {
   const [tokenTwo, setTokenTwo] = useState(tokenList[1]);
   const [isOpen, setIsOpen] = useState(false);
   const [changeToken, setChangeToken] = useState(1);
+  const [prices, setPrices] = useState(null);
 
 
   function handleSlippage(e) {
@@ -25,13 +27,22 @@ function Swap() {
 
   function changeAmount(e) {
     setTokenOneAmount(e.target.value);
+    if (e.target.value && prices) {
+      setTokenTwoAmount((e.target.value * prices.ratio).toFixed(2))
+    } else {
+      setTokenTwoAmount(null);
+    }
   }
 
   function switchTokens() {
+    setPrices(null);
+    setTokenOneAmount(null);
+    setTokenTwoAmount(null);
     const one = tokenOne;
     const two = tokenTwo;
     setTokenOne(two);
     setTokenTwo(one);
+    fetchPrices(two.address, one.address);
   }
 
   function openModal(asset) {
@@ -40,13 +51,33 @@ function Swap() {
   }
 
   function modifyToken(i) {
+    setPrices(null);
+    setTokenOneAmount(null);
+    setTokenTwoAmount(null);
     if (changeToken === 1) {
       setTokenOne(tokenList[i]);
+      fetchPrices(tokenList[i].address, tokenTwo.address);
     } else {
       setTokenTwo(tokenList[i]);
+      fetchPrices(tokenOne.address, tokenList[i].address);
     }
     setIsOpen(false);
   }
+
+  async function fetchPrices(one, two) {
+
+    const res = await axios.get(`http://localhost:3001/tokenprice`, {
+      params: { addressOne: one, addressTwo: two }
+    })
+
+    console.log(res.data)
+    setPrices(res.data)
+  }
+
+  useEffect(() => {
+
+    fetchPrices(tokenList[0].address, tokenList[1].address)
+  }, [])
 
   const settings = (
     <>
@@ -100,7 +131,7 @@ function Swap() {
         </div>
         <div className='inputs'>
           <Input placeholder="0" value={tokenOneAmount}
-            onChange={changeAmount} />
+            onChange={changeAmount} disabled={!prices} />
           <Input placeholder="0" value={tokenTwoAmount}
             disabled={true} />
           <div className='switchButton' onClick={switchTokens}>
