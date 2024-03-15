@@ -14,9 +14,10 @@ const headers = {
   'Authorization': `Bearer ${apiKey}`
 };
 
+
 app.use(
   cors({
-      origin: "http://localhost:3000",
+    origin: "http://localhost:3000",
   }));
 
 
@@ -46,8 +47,33 @@ app.get('/tokenPrice', (req, res) => {
     });
 });
 
+app.get('/tokenPricee', (req, res) => {
+
+async function httpCall() {
+
+  const url = "https://api.1inch.dev/price/v1.1/1/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+
+  const config = {
+      headers: {
+  "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+},
+      params: {
+  "currency": "USD"
+}
+  };
+  try {
+    const response = await axios.get(url, config);
+    console.log(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+}   
+httpCall();
+  
+  });
+
 
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
