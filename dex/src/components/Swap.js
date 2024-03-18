@@ -83,15 +83,14 @@ function Swap(props) {
     setIsOpen(false);
   }
 
-  async function fetchPrices(one, two){
+  async function fetchPrices(one, two) {
+    const addresses = `${one},${two}`;
+    const res = await axios.get(`http://localhost:3001/tokenPricee`, {
+        params: { addresses: addresses }
+    });
 
-      const res = await axios.get(`http://localhost:3001/tokenPrice`, {
-        params: {addressOne: one, addressTwo: two}
-      })
-
-      
-      setPrices(res.data)
-  }
+    setPrices(res.data);
+}
 
   // async function fetchDexSwap(){
 
