@@ -73,6 +73,73 @@ app.get('/tokenPricee', async (req, res) => {
   res.json(tokenPrices);
 });
 
+app.get('/allowance', async (req, res) => {
+  const { tokenAddress, walletAddress } = req.query;
+
+  async function checkAllowance(tokenAddress, walletAddress) {
+    const url = "https://api.1inch.dev/swap/v6.0/1/approve/allowance";
+
+    const config = {
+      headers: {
+        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+      },
+      params: {
+        tokenAddress: tokenAddress,
+        walletAddress: walletAddress
+      }
+    };
+
+    const response = await axios.get(url, config);
+    return response.data;
+  }
+
+  try {
+    const allowance = await checkAllowance(req.query.tokenAddress, req.query.walletAddress);
+    res.json(allowance);
+  } catch (error) {
+    if (error.response && error.response.status === 429) {
+      console.error('Rate limit while allowing exceeded:', error.response.data);
+    } else {
+      console.error('Error validating allowance:', error.message);
+    }
+    res.status(500).json({ error: 'An error occurred while fetching allowance' });
+  }
+});
+
+app.get('/transaction', async (req, res) => {
+  const { tokenAddress, walletAddress } = req.query;
+
+  async function executeTransaction(tokenAddress, walletAddress) {
+    const url = "https://api.1inch.dev/swap/v6.0/1/approve/transaction";
+
+    const config = {
+      headers: {
+        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+      },
+      params: {
+        tokenAddress: tokenAddress,
+        walletAddress: walletAddress
+      }
+    };
+
+    const response = await axios.get(url, config);
+    return response.data;
+  }
+
+  try {
+    const transaction = await executeTransaction(req.query.tokenAddress, req.query.walletAddress);
+    res.json(transaction);
+  } catch (error) {
+    if (error.response && error.response.status === 429) {
+      console.error('Rate limit while executing transaction exceeded:', error.response.data);
+    } else {
+      console.error('Error validating transaction:', error.message);
+    }
+    res.status(500).json({ error: 'An error occurred while executing transaction.' });
+  }
+});
+
+
 
 
 app.listen(port, () => {
