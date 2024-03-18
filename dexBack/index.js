@@ -33,19 +33,6 @@ app.get('/tokenList', (req, res) => {
     });
 });
 
-// app.get('/tokenPrice', (req, res) => {
-//   axios.get(tokenPrice, { headers })
-//     .then(response => {
-//       // Handle the API response here
-//       res.json(response.data);
-//     })
-//     .catch(error => {
-//       // Handle errors
-//       console.error(error);
-//       res.status(500).json({ error: 'Internal Server Error' });
-//     });
-// });
-
 app.use(express.json());
 
 app.get('/tokenPricee', async (req, res) => {
@@ -85,6 +72,7 @@ app.get('/tokenPricee', async (req, res) => {
   const tokenPrices = await fetchTokenPrices(addresses);
   res.json(tokenPrices);
 });
+
 
 
 app.listen(port, () => {

@@ -90,7 +90,7 @@ function Swap(props) {
     if (!amount || !prices || !prices[tokenOne.address]) {
       return null;
     }
-  
+
     const priceOne = prices[tokenOne.address];
     const tokenOneValue = amount * priceOne;
     return tokenOneValue.toFixed(2);
@@ -109,7 +109,7 @@ function Swap(props) {
     if (!amount || !prices || !prices[tokenTwo.address]) {
       return null;
     }
-  
+
     const priceTwo = prices[tokenTwo.address];
     const tokenTwoValue = amount * priceTwo;
     return tokenTwoValue.toFixed(2);
@@ -250,14 +250,14 @@ function Swap(props) {
             <DownOutlined />
           </div>
           <div className="assetOneDisplaydInUSD">
-          {prices && calculateTokenOneValueInUSD(tokenOneAmount, prices) !== null && (
-    <p>{calculateTokenOneValueInUSD(tokenOneAmount, prices)} USD</p>
-  )}
+            {prices && calculateTokenOneValueInUSD(tokenOneAmount, prices) !== null && (
+              <p>{calculateTokenOneValueInUSD(tokenOneAmount, prices)} USD</p>
+            )}
           </div>
           <div className="assetTwoDisplaydInUSD">
-          {prices && calculateTokenTwoValueInUSD(tokenTwoAmount, prices) !== null && (
-    <p>{calculateTokenTwoValueInUSD(tokenTwoAmount, prices)} USD</p>
-  )}
+            {prices && calculateTokenTwoValueInUSD(tokenTwoAmount, prices) !== null && (
+              <p>{calculateTokenTwoValueInUSD(tokenTwoAmount, prices)} USD</p>
+            )}
           </div>
 
           {/* onClick={fetchDexSwap} */}

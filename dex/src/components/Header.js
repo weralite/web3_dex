@@ -10,7 +10,7 @@ function Header(props) {
   return (
     <header>
       <div className='leftH'>
-        <img src={Logo} alt="Moralis Logo" className='logo' />
+       
         <Link to="/">
         <div className='link'>Swap</div>
         </Link>
