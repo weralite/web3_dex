@@ -22,12 +22,12 @@ function Swap(props) {
   const [changeToken, setChangeToken] = useState(1);
   const [prices, setPrices] = useState(null);
   const [txDetails, setTxDetails] = useState({
-    to:null,
+    to: null,
     data: null,
     value: null,
-  }); 
+  });
 
-  const {data, sendTransaction} = useSendTransaction({
+  const { data, sendTransaction } = useSendTransaction({
     request: {
       from: address,
       to: String(txDetails.to),
@@ -46,9 +46,12 @@ function Swap(props) {
 
   function changeAmount(e) {
     setTokenOneAmount(e.target.value);
-    if(e.target.value && prices){
-      setTokenTwoAmount((e.target.value * prices.ratio).toFixed(2))
-    }else{
+    if (e.target.value && prices && prices[tokenOne.address] && prices[tokenTwo.address]) {
+      const priceOne = prices[tokenOne.address];
+      const priceTwo = prices[tokenTwo.address];
+      const tokenTwoEquivalent = (e.target.value * priceOne) / priceTwo;
+      setTokenTwoAmount(tokenTwoEquivalent.toFixed(2));
+    } else {
       setTokenTwoAmount(null);
     }
   }
@@ -69,7 +72,7 @@ function Swap(props) {
     setIsOpen(true);
   }
 
-  function modifyToken(i){
+  function modifyToken(i) {
     setPrices(null);
     setTokenOneAmount(null);
     setTokenTwoAmount(null);
@@ -83,77 +86,67 @@ function Swap(props) {
     setIsOpen(false);
   }
 
+  function calculateTokenOneValueInUSD(amount, prices) {
+    if (!amount || !prices || !prices[tokenOne.address]) {
+      return null;
+    }
+  
+    const priceOne = prices[tokenOne.address];
+    const tokenOneValue = amount * priceOne;
+    return tokenOneValue.toFixed(2);
+  }
+
   async function fetchPrices(one, two) {
     const addresses = `${one},${two}`;
     const res = await axios.get(`http://localhost:3001/tokenPricee`, {
-        params: { addresses: addresses }
+      params: { addresses: addresses }
     });
 
     setPrices(res.data);
-}
-
-  // async function fetchDexSwap(){
-
-  //   const allowance = await axios.get(`https://api.1inch.io/v6.0/1/approve/allowance?tokenAddress=${tokenOne.address}&walletAddress=${address}`)
-  
-  //   if(allowance.data.allowance === "0"){
-
-  //     const approve = await axios.get(`https://api.1inch.io/v6.0/1/approve/transaction?tokenAddress=${tokenOne.address}`)
-
-  //     setTxDetails(approve.data);
-  //     console.log("not approved")
-  //     return
-
-  //   }
-
-  //   const tx = await axios.get(
-  //     `https://api.1inch.io/v6.0/1/swap?fromTokenAddress=${tokenOne.address}&toTokenAddress=${tokenTwo.address}&amount=${tokenOneAmount.padEnd(tokenOne.decimals+tokenOneAmount.length, '0')}&fromAddress=${address}&slippage=${slippage}`
-  //   )
-
-  //   let decimals = Number(`1E${tokenTwo.decimals}`)
-  //   setTokenTwoAmount((Number(tx.data.toTokenAmount)/decimals).toFixed(2));
-
-  //   setTxDetails(tx.data.tx);
-  
-  // }
+  }
 
 
-  useEffect(()=>{
+
+  useEffect(() => {
+    fetchPrices('tokenOneAddress', 'tokenTwoAddress');
+  }, []);
+
+  useEffect(() => {
 
     fetchPrices(tokenList[0].address, tokenList[1].address)
 
   }, [])
 
-  useEffect(()=>{
+  useEffect(() => {
 
-      if(txDetails.to && isConnected){
-        sendTransaction();
-      }
+    if (txDetails.to && isConnected) {
+      sendTransaction();
+    }
   }, [txDetails])
 
-  useEffect(()=>{
+  useEffect(() => {
 
     messageApi.destroy();
 
-    if(isLoading){
+    if (isLoading) {
       messageApi.open({
         type: 'loading',
         content: 'Transaction is Pending...',
         duration: 0,
       })
-    }    
+    }
 
-  },[isLoading])
+  }, [isLoading])
 
-  useEffect(()=>{
+  useEffect(() => {
     messageApi.destroy();
-    if(isSuccess){
+    if (isSuccess) {
       messageApi.open({
         type: 'success',
         content: 'Transaction Successful',
         duration: 1.5,
       })
-    }else if(txDetails.to){
+    } else if (txDetails.to) {
       messageApi.open({
         type: 'error',
         content: 'Transaction Failed',
@@ -162,8 +155,7 @@ function Swap(props) {
     }
 
 
-  },[isSuccess])
-
+  }, [isSuccess])
 
   const settings = (
     <>
@@ -238,6 +230,16 @@ function Swap(props) {
             {tokenTwo.ticker}
             <DownOutlined />
           </div>
+          <div className="assetOneDisplaydInUSD">
+          {prices && calculateTokenOneValueInUSD(tokenOneAmount, prices) !== null && (
+    <p>{calculateTokenOneValueInUSD(tokenOneAmount, prices)} USD</p>
+  )}
+          </div>
+          {/* <div className="assetTwoDisplaydInUSD">
+            {prices && prices[tokenTwo.address] !== undefined && (
+              <p>{prices[tokenTwo.address]} USD</p>
+            )}
+          </div> */}
 
           {/* onClick={fetchDexSwap} */}
 
