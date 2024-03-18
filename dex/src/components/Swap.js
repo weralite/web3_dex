@@ -105,6 +105,25 @@ function Swap(props) {
     setPrices(res.data);
   }
 
+  function calculateTokenTwoValueInUSD(amount, prices) {
+    if (!amount || !prices || !prices[tokenTwo.address]) {
+      return null;
+    }
+  
+    const priceTwo = prices[tokenTwo.address];
+    const tokenTwoValue = amount * priceTwo;
+    return tokenTwoValue.toFixed(2);
+  }
+
+  async function fetchPrices(one, two) {
+    const addresses = `${one},${two}`;
+    const res = await axios.get(`http://localhost:3001/tokenPricee`, {
+      params: { addresses: addresses }
+    });
+
+    setPrices(res.data);
+  }
+
 
 
   useEffect(() => {
@@ -235,11 +254,11 @@ function Swap(props) {
     <p>{calculateTokenOneValueInUSD(tokenOneAmount, prices)} USD</p>
   )}
           </div>
-          {/* <div className="assetTwoDisplaydInUSD">
-            {prices && prices[tokenTwo.address] !== undefined && (
-              <p>{prices[tokenTwo.address]} USD</p>
-            )}
-          </div> */}
+          <div className="assetTwoDisplaydInUSD">
+          {prices && calculateTokenTwoValueInUSD(tokenTwoAmount, prices) !== null && (
+    <p>{calculateTokenTwoValueInUSD(tokenTwoAmount, prices)} USD</p>
+  )}
+          </div>
 
           {/* onClick={fetchDexSwap} */}
 
