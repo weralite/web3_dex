@@ -114,8 +114,9 @@ function delay(ms) {
 
 app.get('/transaction', async (req, res) => {
   const { tokenAddress } = req.query;
+  let approvalExecuted = false;
 
-  async function executeTransaction(tokenAddress) {
+  async function approveTokenForSwap(tokenAddress) {
     const url = "https://api.1inch.dev/swap/v6.0/56/approve/transaction";
 
     const config = {
@@ -133,15 +134,17 @@ app.get('/transaction', async (req, res) => {
   }
 
   try {
-    const transaction = await executeTransaction(tokenAddress);
+    const transaction = await approveTokenForSwap(tokenAddress);
     res.json(transaction);
+    approvalExecuted = true;
   } catch (error) {
     console.error('Error making axios request:', error.message);
     if (error.response && error.response.status === 429) {
       // If a rate limit error occurred, wait for 1 second before retrying
       await delay(2000);
-      const transaction = await executeTransaction(tokenAddress);
+      const transaction = await approveTokenForSwap(tokenAddress);
       res.json(transaction);
+      approvalExecuted = true;
     } else if (error.response) {
       console.error('Error response data:', error.response.data);
       console.error('Error response status:', error.response.status);
@@ -157,6 +160,7 @@ app.get('/transaction', async (req, res) => {
 
 app.get('/swap', async (req, res) => {
   const { fromToken, toToken, amount, walletAddress, slippage } = req.query;
+  let swapExecuted = false;
 
   async function executeSwap() {
     const url = "https://api.1inch.dev/swap/v6.0/56/swap";
@@ -184,6 +188,7 @@ app.get('/swap', async (req, res) => {
         tx: response.data.tx
       };
       res.json(formattedResponse);
+      swapExecuted = true;
     } catch (error) {
       console.error(error);
       if (error.response && error.response.status === 400) {
@@ -206,7 +211,7 @@ app.get('/swap', async (req, res) => {
       }
     }
   }
-
+  await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2000 milliseconds before executing the swap
   executeSwap(); // Start the swap operation
 });
 

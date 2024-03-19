@@ -28,7 +28,7 @@ function Swap(props) {
     value: null,
   });
 
-  const { data, sendTransaction } = useSendTransaction({
+  const { data: sendTransactionData, sendTransaction } = useSendTransaction({
     request: {
       from: address,
       to: String(txDetails.to),
@@ -37,12 +37,23 @@ function Swap(props) {
     }
   })
 
-  const walletAddress = address;
-  const amount = tokenOneAmount;
+  /// Fångar hash och uppdaterar sendTransactionData med hashen
+
+  const updatedData = {
+    ...sendTransactionData,
+    hash: txDetails.hash // Assuming txDetails contains the transaction hash
+  };
+
+  //// Kanske ta bort hela skiten isLoading, isSuccess?????? V
 
   const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
+    hash: updatedData?.hash,
   })
+
+  console.log("Sendtransactiondata", sendTransactionData);
+console.log("txdetails",txDetails);
+  console.log("isLoading",isLoading);
+  console.log("isSuccess",isSuccess);
 
   function handleSlippageChange(e) {
     setSlippage(e.target.value);
