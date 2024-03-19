@@ -1,0 +1,32 @@
+[
+    {
+        "ticker": "WBNB",
+        "img": "https://tokens.1inch.io/0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c.png",
+        "name": "Wrapped BNB",
+        "address": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+        "decimals": 18
+    },
+    {
+        "ticker": "CAKE",
+        "img": "https://tokens.1inch.io/0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82.png",
+        "name": "PancakeSwap Token",
+        "address": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+        "decimals": 18
+    },
+    {
+        "ticker": "USDT",
+        "img": "https://tokens.1inch.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png",
+        "name": "Tether USD",
+        "address": "0x55d398326f99059ff775485246999027b3197955",
+        "decimals": 18
+    },
+    {
+        "ticker": "BUSD",
+        "img": "https://tokens.1inch.io/0x4fabb145d64652a948d72533023f6e7a623c7c53.png",
+        "name": "BUSD Token",
+        "address": "0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd",
+        "decimals": 18
+    }
+
+
+]

@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-const tokenList = 'https://api.1inch.dev/swap/v6.0/1/tokens';
+const tokenList = 'https://api.1inch.dev/swap/v6.0/56/tokens';
 const apiKey = 'wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc';
 
 const headers = {
@@ -39,7 +39,7 @@ app.get('/tokenPricee', async (req, res) => {
   const { addresses } = req.query;
 
   async function fetchTokenPrices(addresses) {
-      const url = `https://api.1inch.dev/price/v1.1/1/${addresses}`;
+      const url = `https://api.1inch.dev/price/v1.1/56/${addresses}`;
       const config = {
           headers: {
               "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
@@ -78,7 +78,7 @@ app.get('/allowance', async (req, res) => {
   const { tokenAddress, walletAddress } = req.query;
 
   async function checkAllowance(tokenAddress, walletAddress) {
-    const url = "https://api.1inch.dev/swap/v6.0/1/approve/allowance";
+    const url = "https://api.1inch.dev/swap/v6.0/56/approve/allowance";
 
     const config = {
       headers: {
@@ -108,11 +108,15 @@ app.get('/allowance', async (req, res) => {
   }
 });
 
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 app.get('/transaction', async (req, res) => {
   const { tokenAddress } = req.query;
 
   async function executeTransaction(tokenAddress) {
-    const url = "https://api.1inch.dev/swap/v6.0/1/approve/transaction";
+    const url = "https://api.1inch.dev/swap/v6.0/56/approve/transaction";
 
     const config = {
       headers: {
@@ -124,23 +128,32 @@ app.get('/transaction', async (req, res) => {
     };
 
     const response = await axios.get(url, config);
+    console.log(`Made request with tokenAddress ${tokenAddress}, received status code ${response.status}`);
     return response.data;
   }
 
   try {
-    const transaction = await executeTransaction(req.query.tokenAddress);
+    const transaction = await executeTransaction(tokenAddress);
     res.json(transaction);
-    console.log(transaction);
   } catch (error) {
+    console.error('Error making axios request:', error.message);
     if (error.response && error.response.status === 429) {
-      console.error('Rate limit while executing transaction exceeded:', error.response.data);
+      // If a rate limit error occurred, wait for 1 second before retrying
+      await delay(2000);
+      const transaction = await executeTransaction(tokenAddress);
+      res.json(transaction);
+    } else if (error.response) {
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      console.error('Error response headers:', error.response.headers);
+      // Send the actual error status code and message in the response, if available
+      res.status(error.response.status || 500).json({ error: error.response.data || 'An error occurred while executing transaction.' });
     } else {
-      console.error('Error validating transaction:', error.message);
+      // If there's no error response, it's likely a server error, so send a 500 response
+      res.status(500).json({ error: 'An error occurred while executing transaction.' });
     }
-    res.status(500).json({ error: 'An error occurred while executing transaction.' });
   }
 });
-
 
 
 

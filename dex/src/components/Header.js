@@ -1,6 +1,6 @@
 import React from 'react'
 import Logo from "../moralis-logo.svg";
-import Eth from "../eth.svg";
+import Eth from "../bnblogo.webp";
 import { Link } from "react-router-dom";
 
 function Header(props) {
@@ -23,7 +23,7 @@ function Header(props) {
       <div className='rightH'>
         <div className='headerItem'>
           <img src={Eth} alt="Ethereum Logo" className='eth' />
-          Ethereum
+          Binance
         </div>
         <div className='connectButton' onClick={connect}>
           {isConnected ? (address.slice(0,4) +"..." +address.slice(38)) : "Connect"}
