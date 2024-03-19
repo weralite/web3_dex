@@ -73,6 +73,7 @@ app.get('/tokenPricee', async (req, res) => {
   res.json(tokenPrices);
 });
 
+
 app.get('/allowance', async (req, res) => {
   const { tokenAddress, walletAddress } = req.query;
 
@@ -96,6 +97,7 @@ app.get('/allowance', async (req, res) => {
   try {
     const allowance = await checkAllowance(req.query.tokenAddress, req.query.walletAddress);
     res.json(allowance);
+    console.log(allowance);
   } catch (error) {
     if (error.response && error.response.status === 429) {
       console.error('Rate limit while allowing exceeded:', error.response.data);
@@ -107,9 +109,9 @@ app.get('/allowance', async (req, res) => {
 });
 
 app.get('/transaction', async (req, res) => {
-  const { tokenAddress, walletAddress } = req.query;
+  const { tokenAddress } = req.query;
 
-  async function executeTransaction(tokenAddress, walletAddress) {
+  async function executeTransaction(tokenAddress) {
     const url = "https://api.1inch.dev/swap/v6.0/1/approve/transaction";
 
     const config = {
@@ -118,7 +120,6 @@ app.get('/transaction', async (req, res) => {
       },
       params: {
         tokenAddress: tokenAddress,
-        walletAddress: walletAddress
       }
     };
 
@@ -127,8 +128,9 @@ app.get('/transaction', async (req, res) => {
   }
 
   try {
-    const transaction = await executeTransaction(req.query.tokenAddress, req.query.walletAddress);
+    const transaction = await executeTransaction(req.query.tokenAddress);
     res.json(transaction);
+    console.log(transaction);
   } catch (error) {
     if (error.response && error.response.status === 429) {
       console.error('Rate limit while executing transaction exceeded:', error.response.data);

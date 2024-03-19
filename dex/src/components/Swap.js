@@ -36,6 +36,9 @@ function Swap(props) {
     }
   })
 
+  const walletAddress = address;
+  const amount = tokenOneAmount;
+
   const { isLoading, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
   })
@@ -104,6 +107,41 @@ function Swap(props) {
 
     setPrices(res.data);
   }
+  async function fetchDexSwap() {
+    try {
+      // Fetch allowance using the updated API endpoint
+      const allowanceResponse = await axios.get(`http://localhost:3001/allowance`, {
+        params: {
+          tokenAddress: tokenOne.address,
+          walletAddress: address
+        }
+      });
+      console.log(allowanceResponse.data);
+
+      if (allowanceResponse.data.allowance === "0") {
+        // If allowance is "0", fetch transaction details to approve
+        const approveResponse = await axios.get(`http://localhost:3001/transaction`, {
+          params: {
+            tokenAddress: tokenOne.address,
+
+
+          }
+        });
+        console.log(approveResponse.data);
+
+        // Set transaction details and log message
+        setTxDetails(approveResponse.data);
+        console.log("Not approved");
+        return;
+      }
+      console.log("Approved");
+    } catch (error) {
+      // Handle errors, e.g., network issues or API response errors
+      console.error("Error approving data:", error.message);
+      // Optionally, set an error state or display an error message to the user
+    }
+  }
+
 
   function calculateTokenTwoValueInUSD(amount, prices) {
     if (!amount || !prices || !prices[tokenTwo.address]) {
@@ -263,7 +301,7 @@ function Swap(props) {
           {/* onClick={fetchDexSwap} */}
 
         </div>
-        <div className="swapButton" disabled={!tokenOneAmount || !isConnected} >Swap</div>
+        <div className="swapButton" disabled={!tokenOneAmount || !isConnected} onClick={fetchDexSwap} >Swap</div>
       </div>
     </>
   );
