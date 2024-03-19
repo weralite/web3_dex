@@ -155,7 +155,60 @@ app.get('/transaction', async (req, res) => {
   }
 });
 
+app.get('/swap', async (req, res) => {
+  const { fromToken, toToken, amount, walletAddress, slippage } = req.query;
 
+  async function executeSwap() {
+    const url = "https://api.1inch.dev/swap/v6.0/56/swap";
+
+    const config = {
+      headers: {
+        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+      },
+      params: {
+        "src": fromToken,
+        "dst": toToken,
+        "amount": amount,
+        "from": walletAddress,
+        "slippage": slippage
+      }
+    };
+
+    try {
+      const response = await axios.get(url, config);
+      console.log(response.data);
+      const formattedResponse = {
+        fromToken: response.data.fromToken,
+        toToken: response.data.toToken,
+        toAmount: response.data.amount,
+        tx: response.data.tx
+      };
+      res.json(formattedResponse);
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 400) {
+        // If the error is 400 (Bad Request), format the error message according to the provided schema
+        const errorData = {
+          error: "Bad Request",
+          description: error.response.data.description,
+          statusCode: error.response.status,
+          requestId: error.response.headers["x-request-id"],
+          meta: [] // No additional metadata provided
+        };
+        res.status(400).json(errorData);
+      } else if (error.response && error.response.status === 429) {
+        // If the error is 429 (Too Many Requests), wait for 2000 milliseconds and retry
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return executeSwap(); // Retry the swap operation after the delay
+      } else {
+        // Handle other errors
+        res.status(500).json({ error: "Failed to execute swap" });
+      }
+    }
+  }
+
+  executeSwap(); // Start the swap operation
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

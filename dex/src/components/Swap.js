@@ -8,6 +8,7 @@ import {
 import tokenList from "../tokenListBSC.json";
 import axios from "axios";
 import { useSendTransaction, useWaitForTransaction } from "wagmi";
+import { set } from "mongoose";
 
 
 function Swap(props) {
@@ -99,6 +100,22 @@ function Swap(props) {
     return tokenOneValue.toFixed(2);
   }
 
+  function formatWith18Decimals(tokenOneAmount) {
+    // Convert the amount to a string
+    const amountString = String(tokenOneAmount);
+
+    // Split the amount into integer and fractional parts
+    const [integerPart, fractionalPart] = amountString.split('.');
+
+    // If fractional part exists, pad it with zeros to ensure it has 18 decimals
+    const paddedFractionalPart = fractionalPart ? fractionalPart.padEnd(18, '0') : '000000000000000000';
+
+    // Concatenate the integer part and padded fractional part
+    const formattedAmount = integerPart + paddedFractionalPart;
+
+    return formattedAmount;
+}
+
   async function fetchPrices(one, two) {
     const addresses = `${one},${two}`;
     const res = await axios.get(`http://localhost:3001/tokenPricee`, {
@@ -135,6 +152,19 @@ function Swap(props) {
         return;
       }
       console.log("Approved");
+      const formattedAmount = formatWith18Decimals(tokenOneAmount);
+      const performSwap = await axios.get(`http://localhost:3001/swap`, {
+        params: {
+          fromToken: tokenOne.address,
+          toToken: tokenTwo.address,
+          amount: formattedAmount,
+          walletAddress: address,
+          slippage: slippage
+        
+        }
+      });
+      console.log(performSwap.data);
+      setTxDetails(performSwap.data.tx);
     } catch (error) {
       // Handle errors, e.g., network issues or API response errors
       console.error("Error approving data:", error.message);
