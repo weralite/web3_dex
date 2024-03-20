@@ -8,7 +8,6 @@ import {
 import tokenList from "../tokenListBSC.json";
 import axios from "axios";
 import { useSendTransaction, useWaitForTransaction } from "wagmi";
-import { set } from "mongoose";
 
 
 function Swap(props) {
@@ -28,7 +27,7 @@ function Swap(props) {
     value: null,
   });
 
-  const { data: sendTransactionData, sendTransaction } = useSendTransaction({
+  const { data, sendTransaction } = useSendTransaction({
     request: {
       from: address,
       to: String(txDetails.to),
@@ -37,23 +36,17 @@ function Swap(props) {
     }
   })
 
-  /// Fångar hash och uppdaterar sendTransactionData med hashen
-
-  const updatedData = {
-    ...sendTransactionData,
-    hash: txDetails.hash // Assuming txDetails contains the transaction hash
-  };
-
-  //// Kanske ta bort hela skiten isLoading, isSuccess?????? V
 
   const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: updatedData?.hash,
+    chainId: 56,
+    confirmations: 1,
+    hash: data?.hash,
   })
-
-  console.log("Sendtransactiondata", sendTransactionData);
-console.log("txdetails",txDetails);
-  console.log("isLoading",isLoading);
-  console.log("isSuccess",isSuccess);
+  console.log("jsondata", JSON.stringify(data));
+  console.log("data", data);
+  console.log("txdetails", txDetails);
+  console.log("isLoading", isLoading);
+  console.log("isSuccess", isSuccess);
 
   function handleSlippageChange(e) {
     setSlippage(e.target.value);
@@ -125,7 +118,7 @@ console.log("txdetails",txDetails);
     const formattedAmount = integerPart + paddedFractionalPart;
 
     return formattedAmount;
-}
+  }
 
   async function fetchPrices(one, two) {
     const addresses = `${one},${two}`;
@@ -171,7 +164,7 @@ console.log("txdetails",txDetails);
           amount: formattedAmount,
           walletAddress: address,
           slippage: slippage
-        
+
         }
       });
       console.log(performSwap.data);
