@@ -20,6 +20,28 @@ app.use(
   }));
 
 
+function mapResponseToSchema(data) {
+  return {
+    baseFee: data.baseFee,
+    low: {
+      maxPriorityFeePerGas: data.low.maxPriorityFeePerGas,
+      maxFeePerGas: data.low.maxFeePerGas
+    },
+    medium: {
+      maxPriorityFeePerGas: data.medium.maxPriorityFeePerGas,
+      maxFeePerGas: data.medium.maxFeePerGas
+    },
+    high: {
+      maxPriorityFeePerGas: data.high.maxPriorityFeePerGas,
+      maxFeePerGas: data.high.maxFeePerGas
+    },
+    instant: {
+      maxPriorityFeePerGas: data.instant.maxPriorityFeePerGas,
+      maxFeePerGas: data.instant.maxFeePerGas
+    }
+  };
+}
+
 app.get('/tokenList', (req, res) => {
   axios.get(tokenList, { headers })
     .then(response => {
@@ -92,11 +114,11 @@ app.post('/walletBalance', async (req, res) => {
     };
 
     const body = {
-      "tokens": 
+      "tokens":
         tokens,
-      "wallets": 
+      "wallets":
         wallets
-      
+
     };
 
     console.log("Making API request...");
@@ -104,7 +126,7 @@ app.post('/walletBalance', async (req, res) => {
       await delay(5000); // Delay of 5000ms
       const response = await axios.post(url, body, config);
       return response.data;
-      
+
     } catch (error) {
       if (error.response && error.response.status === 429) {
         console.error('Rate limit fetching balance exceeded:', error.response.data);
@@ -119,6 +141,42 @@ app.post('/walletBalance', async (req, res) => {
   const walletBalance = await getWalletBalance();
   console.log("Wallet balance:", walletBalance);
   res.json(walletBalance);
+});
+
+
+app.get('/api/gas-price', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('Cache-Control', 'no-store, max-age=0');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+
+  async function fetchGasPrice() {
+    const url = "https://api.1inch.dev/gas-price/v1.5/56";
+    const config = {
+      headers: {
+        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+      },
+      params: {}
+    };
+
+    try {
+      await delay(3000); // Delay of 5000ms
+      const response = await axios.get(url, config);
+      const gasPrice = response.data;
+      console.log(gasPrice);
+      return gasPrice;
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.error('Rate limit fetching balance exceeded:', error.response.data);
+      } else {
+        console.error('Error fetching balance:', error.message);
+      }
+      return null;
+    }
+  }
+
+  const gasPrice = await fetchGasPrice();
+  res.json(gasPrice);
 });
 
 app.get('/allowance', async (req, res) => {

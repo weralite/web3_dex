@@ -22,6 +22,7 @@ function Swap(props) {
   const [isOpen, setIsOpen] = useState(false);
   const [changeToken, setChangeToken] = useState(1);
   const [prices, setPrices] = useState(null);
+  const [gasPrice, setGasPrice] = useState(null);
   const [balance, setBalance] = useState(null);
   const [txDetails, setTxDetails] = useState({
     to: null,
@@ -41,11 +42,7 @@ function Swap(props) {
   const { isLoading, isSuccess } = useWaitForTransaction({
     hash: data?.hash,
   })
-  console.log("jsondata", JSON.stringify(data));
-  console.log("data", data);
-  console.log("txdetails", txDetails);
-  console.log("isLoading", isLoading);
-  console.log("isSuccess", isSuccess);
+
 
   function handleSlippageChange(e) {
     setSlippage(e.target.value);
@@ -92,6 +89,13 @@ function Swap(props) {
     }
     setIsOpen(false);
   }
+  function formatGasPrice(gasPrice) {
+    // Convert the gas price to a number and divide by 10^9 to get the value in Gwei
+    const formattedGasPrice = Number(gasPrice) / (10 ** 13);
+  
+    // Format the number to 6 decimal places
+    return formattedGasPrice.toFixed(6);
+  }
 
   function displayBalance(token, address) {
     if (balance && balance[address] && balance[address][token.address]) {
@@ -127,6 +131,12 @@ function Swap(props) {
     return formattedAmount;
   }
 
+  async function fetchGasPrice() {
+    
+      const res = await axios.get('http://localhost:3001/api/gas-price');
+      setGasPrice(res.data);
+  }
+
   async function fetchWalletBalance() {
     const tokenAdresses = `${tokenOne.address},${tokenTwo.address}`;
     const wallets = `${address}`;
@@ -134,12 +144,8 @@ function Swap(props) {
       "tokens": [tokenOne.address, tokenTwo.address],
       "wallets": [address]
     });
-    console.log("Balances", res.data);
     setBalance(res.data);
   }
-
-
-
 
   async function fetchPrices(one, two) {
     const addresses = `${one},${two}`;
@@ -158,7 +164,6 @@ function Swap(props) {
           walletAddress: address
         }
       });
-      console.log(allowanceResponse.data);
 
       if (allowanceResponse.data.allowance === "0") {
         // If allowance is "0", fetch transaction details to approve
@@ -169,7 +174,6 @@ function Swap(props) {
 
           }
         });
-        console.log(approveResponse.data);
 
         // Set transaction details and log message
         setTxDetails(approveResponse.data);
@@ -188,7 +192,6 @@ function Swap(props) {
 
         }
       });
-      console.log(performSwap.data);
       setTxDetails(performSwap.data.tx);
     } catch (error) {
       // Handle errors, e.g., network issues or API response errors
@@ -209,12 +212,11 @@ function Swap(props) {
   }
 
   useEffect(() => {
-    console.log('Running effect');
     fetchWalletBalance(tokenList[0].address)
+  }, [])
 
-    return () => {
-      console.log('Cleaning up effect');
-    };
+  useEffect(() => {
+     fetchGasPrice();
   }, [])
 
   useEffect(() => {
@@ -275,7 +277,6 @@ function Swap(props) {
       </div>
     </>
   );
-  console.log("Balance state:", balance);
   return (
     <>
       {contextHolder}
@@ -354,7 +355,7 @@ function Swap(props) {
             {displayBalance(tokenTwo, address)}
           </div>
           <div className="slippageContainer">Slippage Tolerance {slippage}%</div>
-          <div className="slippageContainer">Estimated Gas</div>
+          <div className="slippageContainer">Estimated Gas {gasPrice && formatGasPrice(gasPrice.standard)} BNB</div>
           
 
         </div>
