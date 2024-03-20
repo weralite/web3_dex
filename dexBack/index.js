@@ -39,40 +39,87 @@ app.get('/tokenPricee', async (req, res) => {
   const { addresses } = req.query;
 
   async function fetchTokenPrices(addresses) {
-      const url = `https://api.1inch.dev/price/v1.1/56/${addresses}`;
-      const config = {
-          headers: {
-              "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
-          },
-          params: {
-              "currency": "USD"
-          }
-      };
-
-      try {
-          const response = await axios.get(url, config);
-          const prices = response.data;
-
-          // Log token prices in USD
-          Object.keys(prices).forEach(token => {
-              console.log(`Price of ${token} compared to USD:`, prices[token]);
-          });
-
-          return prices;
-      } catch (error) {
-          if (error.response && error.response.status === 429) {
-              console.error('Rate limit exceeded:', error.response.data);
-          } else {
-              console.error('Error fetching prices:', error.message);
-          }
-          return null;
+    const url = `https://api.1inch.dev/price/v1.1/56/${addresses}`;
+    const config = {
+      headers: {
+        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+      },
+      params: {
+        "currency": "USD"
       }
+    };
+
+    try {
+      const response = await axios.get(url, config);
+      const prices = response.data;
+
+      // Log token prices in USD
+      Object.keys(prices).forEach(token => {
+        console.log(`Price of ${token} compared to USD:`, prices[token]);
+      });
+
+      return prices;
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.error('Rate limit fetching price exceeded:', error.response.data);
+      } else {
+        console.error('Error fetching prices:', error.message);
+      }
+      return null;
+    }
   }
 
   const tokenPrices = await fetchTokenPrices(addresses);
   res.json(tokenPrices);
 });
 
+
+app.post('/walletBalance', async (req, res) => {
+  console.log('Received request for /walletBalance');
+  const { tokens, wallets } = req.body;
+
+  console.log("Waiting for 2000ms...");
+  await delay(2000); // Delay of 2000ms
+  console.log("Timer finished, continuing execution...");
+
+  async function getWalletBalance() {
+    const url = "https://api.1inch.dev/balance/v1.2/56/balances/multiple/walletsAndTokens";
+
+    const config = {
+      headers: {
+        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+      },
+    };
+
+    const body = {
+      "tokens": 
+        tokens,
+      "wallets": 
+        wallets
+      
+    };
+
+    console.log("Making API request...");
+    try {
+      await delay(5000); // Delay of 5000ms
+      const response = await axios.post(url, body, config);
+      return response.data;
+      
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.error('Rate limit fetching balance exceeded:', error.response.data);
+      } else {
+        console.error('Error fetching balance:', error.message);
+      }
+      return null;
+    }
+  }
+
+  console.log("Calling getWalletBalance function...");
+  const walletBalance = await getWalletBalance();
+  console.log("Wallet balance:", walletBalance);
+  res.json(walletBalance);
+});
 
 app.get('/allowance', async (req, res) => {
   const { tokenAddress, walletAddress } = req.query;

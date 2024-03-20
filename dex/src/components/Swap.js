@@ -8,6 +8,7 @@ import {
 import tokenList from "../tokenListBSC.json";
 import axios from "axios";
 import { useSendTransaction, useWaitForTransaction } from "wagmi";
+import { set } from "mongoose";
 
 
 function Swap(props) {
@@ -21,6 +22,7 @@ function Swap(props) {
   const [isOpen, setIsOpen] = useState(false);
   const [changeToken, setChangeToken] = useState(1);
   const [prices, setPrices] = useState(null);
+  const [balance, setBalance] = useState(null);
   const [txDetails, setTxDetails] = useState({
     to: null,
     data: null,
@@ -36,10 +38,7 @@ function Swap(props) {
     }
   })
 
-
   const { isLoading, isSuccess } = useWaitForTransaction({
-    chainId: 56,
-    confirmations: 1,
     hash: data?.hash,
   })
   console.log("jsondata", JSON.stringify(data));
@@ -94,6 +93,8 @@ function Swap(props) {
     setIsOpen(false);
   }
 
+
+
   function calculateTokenOneValueInUSD(amount, prices) {
     if (!amount || !prices || !prices[tokenOne.address]) {
       return null;
@@ -119,6 +120,20 @@ function Swap(props) {
 
     return formattedAmount;
   }
+
+  async function fetchWalletBalance() {
+    const tokenAdresses = `${tokenOne.address},${tokenTwo.address}`;
+    const wallets = `${address}`;
+    const res = await axios.post('http://localhost:3001/walletBalance', {
+      "tokens": [tokenOne.address, tokenTwo.address],
+      "wallets": [address]
+    });
+    console.log("Balances", res.data);
+    setBalance(res.data);
+  }
+
+
+
 
   async function fetchPrices(one, two) {
     const addresses = `${one},${two}`;
@@ -187,20 +202,14 @@ function Swap(props) {
     return tokenTwoValue.toFixed(2);
   }
 
-  async function fetchPrices(one, two) {
-    const addresses = `${one},${two}`;
-    const res = await axios.get(`http://localhost:3001/tokenPricee`, {
-      params: { addresses: addresses }
-    });
-
-    setPrices(res.data);
-  }
-
-
-
   useEffect(() => {
-    fetchPrices('tokenOneAddress', 'tokenTwoAddress');
-  }, []);
+    console.log('Running effect');
+    fetchWalletBalance(tokenList[0].address)
+  
+    return () => {
+      console.log('Cleaning up effect');
+    };
+  }, [])
 
   useEffect(() => {
 
@@ -247,7 +256,7 @@ function Swap(props) {
 
 
   }, [isSuccess])
-
+  
   const settings = (
     <>
       <div>Slippage Tolerance</div>
@@ -331,6 +340,7 @@ function Swap(props) {
               <p>{calculateTokenTwoValueInUSD(tokenTwoAmount, prices)} USD</p>
             )}
           </div>
+          <div className="assetOneWalletBalance"> 144</div>
 
           {/* onClick={fetchDexSwap} */}
 
