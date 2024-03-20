@@ -6,11 +6,11 @@ const app = express();
 const port = 3001;
 
 const tokenList = 'https://api.1inch.dev/swap/v6.0/56/tokens';
-const apiKey = 'wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc';
+const API_KEY = "ENTER KEY HERE";
 
 const headers = {
   'accept': 'application/json',
-  'Authorization': `Bearer ${apiKey}`
+  "Authorization": `Bearer ${API_KEY}`
 };
 
 
@@ -19,28 +19,6 @@ app.use(
     origin: "http://localhost:3000",
   }));
 
-
-function mapResponseToSchema(data) {
-  return {
-    baseFee: data.baseFee,
-    low: {
-      maxPriorityFeePerGas: data.low.maxPriorityFeePerGas,
-      maxFeePerGas: data.low.maxFeePerGas
-    },
-    medium: {
-      maxPriorityFeePerGas: data.medium.maxPriorityFeePerGas,
-      maxFeePerGas: data.medium.maxFeePerGas
-    },
-    high: {
-      maxPriorityFeePerGas: data.high.maxPriorityFeePerGas,
-      maxFeePerGas: data.high.maxFeePerGas
-    },
-    instant: {
-      maxPriorityFeePerGas: data.instant.maxPriorityFeePerGas,
-      maxFeePerGas: data.instant.maxFeePerGas
-    }
-  };
-}
 
 app.get('/tokenList', (req, res) => {
   axios.get(tokenList, { headers })
@@ -64,7 +42,7 @@ app.get('/tokenPricee', async (req, res) => {
     const url = `https://api.1inch.dev/price/v1.1/56/${addresses}`;
     const config = {
       headers: {
-        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+        "Authorization": `Bearer ${API_KEY}`
       },
       params: {
         "currency": "USD"
@@ -109,7 +87,7 @@ app.post('/walletBalance', async (req, res) => {
 
     const config = {
       headers: {
-        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+        "Authorization": `Bearer ${API_KEY}`
       },
     };
 
@@ -154,13 +132,13 @@ app.get('/api/gas-price', async (req, res) => {
     const url = "https://api.1inch.dev/gas-price/v1.5/56";
     const config = {
       headers: {
-        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+        "Authorization": `Bearer ${API_KEY}`
       },
       params: {}
     };
 
     try {
-      await delay(3000); // Delay of 5000ms
+      await delay(8000); // Delay of 5000ms
       const response = await axios.get(url, config);
       const gasPrice = response.data;
       console.log(gasPrice);
@@ -187,7 +165,7 @@ app.get('/allowance', async (req, res) => {
 
     const config = {
       headers: {
-        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+        "Authorization": `Bearer ${API_KEY}`
       },
       params: {
         tokenAddress: tokenAddress,
@@ -226,7 +204,7 @@ app.get('/transaction', async (req, res) => {
 
     const config = {
       headers: {
-        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+        "Authorization": `Bearer ${API_KEY}`
       },
       params: {
         tokenAddress: tokenAddress,
@@ -272,7 +250,7 @@ app.get('/swap', async (req, res) => {
 
     const config = {
       headers: {
-        "Authorization": "Bearer wdkgxDpkCD2ZfzOmzuoiC3Xas2rYHljc"
+        "Authorization": `Bearer ${API_KEY}`
       },
       params: {
         "src": fromToken,
