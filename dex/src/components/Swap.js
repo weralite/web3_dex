@@ -93,7 +93,13 @@ function Swap(props) {
     setIsOpen(false);
   }
 
-
+  function displayBalance(token, address) {
+    if (balance && balance[address] && balance[address][token.address]) {
+      const formattedBalance = Number(balance[address][token.address]) / (10 ** 18);
+      return <>{token.ticker}: {formattedBalance.toFixed(5)}</>; // Display up to 4 decimal places
+    }
+    return null;
+  }
 
   function calculateTokenOneValueInUSD(amount, prices) {
     if (!amount || !prices || !prices[tokenOne.address]) {
@@ -205,7 +211,7 @@ function Swap(props) {
   useEffect(() => {
     console.log('Running effect');
     fetchWalletBalance(tokenList[0].address)
-  
+
     return () => {
       console.log('Cleaning up effect');
     };
@@ -256,7 +262,7 @@ function Swap(props) {
 
 
   }, [isSuccess])
-  
+
   const settings = (
     <>
       <div>Slippage Tolerance</div>
@@ -269,7 +275,7 @@ function Swap(props) {
       </div>
     </>
   );
-
+  console.log("Balance state:", balance);
   return (
     <>
       {contextHolder}
@@ -340,9 +346,16 @@ function Swap(props) {
               <p>{calculateTokenTwoValueInUSD(tokenTwoAmount, prices)} USD</p>
             )}
           </div>
-          <div className="assetOneWalletBalance"> 144</div>
 
-          {/* onClick={fetchDexSwap} */}
+          <div className="assetOneWalletBalance">
+            {displayBalance(tokenOne, address)}
+          </div>
+          <div className="assetTwoWalletBalance">
+            {displayBalance(tokenTwo, address)}
+          </div>
+          <div className="slippageContainer">Slippage Tolerance {slippage}%</div>
+          <div className="slippageContainer">Estimated Gas</div>
+          
 
         </div>
         <div className="swapButton" disabled={!tokenOneAmount || !isConnected} onClick={fetchDexSwap} >Swap</div>
