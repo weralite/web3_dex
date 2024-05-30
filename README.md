@@ -44,5 +44,5 @@ Application renders real-time gas fees and token prices in USD.
 - **Wagmi**: Wagmi is a development tool for EVM-based blockchains that provides hooks for interacting with wallets, contracts, and transactions.
 - **Moralis**: Moralis is a dev platform that offers a Web3 toolkit to create, launch and grow dApps in one place
 
-For a full list of dependencies, please refer to the [package.json](./dex/package.json) file.
+For a full list of dependencies, please refer to the client [package.json](./dex/package.json) file and server [package.json](./dexBack/package.json) file.
 
